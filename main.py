@@ -22,11 +22,23 @@ async def on_ready():
     print("Ready")
 
 @bot.command()  
-async def hello(ctx, title, description, role): 
+async def hello(ctx, title, description, role: discord.Role): 
+    """
+    -------------------------------------------------------
+    Creates a new event
+    User: up!hello "Title" "Description" "@<role>"
+    [Assuming up! is your prefix]
+    -------------------------------------------------------
+    Parameters:
+        title - the title of the role (str)
+        description - the discription of the role (str)
+        role - appropriate role to send (Discord mention)
+    -------------------------------------------------------
+    """
      
     embed = discord.Embed(
         title = title,                
-        description= (f"{description} \n This event is tailored for {role}"),  
+        description= (f"{description} \n This event is tailored for {role.name}"),  
         color=discord.Color.blue()           
     )
     
@@ -36,10 +48,10 @@ async def hello(ctx, title, description, role):
     view.add_item(button1)
     view.add_item(button2)
 
-    role = discord.utils.get(ctx.guild.roles, name=role)
+    role = discord.utils.get(ctx.guild.roles, name=role.name)
     for member in ctx.guild.members:
         if role in member.roles:
-            await member.send("New event! \n You are recieving this message because you opted-in for events relating to this area. To stop recieving event information, click the appropriate button", embed=embed, view = view)  
+            await member.send(f"**New event!**\nYou are recieving this message because you opted-in for events relating to {role.name}. To stop recieving event information, click the appropriate button", embed=embed, view = view)  
 
     await ctx.send(embed=embed, view = view)  
 
