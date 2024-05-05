@@ -3,6 +3,7 @@ import discord
 from discord.ui import Button, View
 from discord.ext import commands 
 import json
+from datetime import datetime
 
 intents = discord.Intents.default()
 intents.members = True 
@@ -22,23 +23,24 @@ async def on_ready():
     print("Ready")
 
 @bot.command()  
-async def hello(ctx, title, description, role: discord.Role): 
+async def hello(ctx, title, description, role: discord.Role, date): 
     """
     -------------------------------------------------------
     Creates a new event
-    User: up!hello "Title" "Description" "@<role>"
+    User: up!hello "Title" "Description" "@<role>" "Date (in format "Month Day Year Time(am/pm)")"
     [Assuming up! is your prefix]
     -------------------------------------------------------
     Parameters:
         title - the title of the role (str)
         description - the discription of the role (str)
         role - appropriate role to send (Discord mention)
+        date - in format listed above (e.g. "May 5 2024 1:30pm") (str)
     -------------------------------------------------------
     """
      
     embed = discord.Embed(
-        title = title,                
-        description= (f"{description} \n This event is tailored for {role.name}"),  
+        title = (f"{title} - {date}"),                
+        description= (f"{description}\n This event is tailored for {role.name}"),  
         color=discord.Color.blue()           
     )
     
@@ -47,6 +49,8 @@ async def hello(ctx, title, description, role: discord.Role):
     view = View()
     view.add_item(button1)
     view.add_item(button2)
+    date_object = datetime.strptime(date, '%B %d %Y %I:%M%p')
+    timestamp = date_object.timestamp()
 
     role = discord.utils.get(ctx.guild.roles, name=role.name)
     for member in ctx.guild.members:
