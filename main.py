@@ -14,9 +14,18 @@ prefix = "up!"
 bot = commands.Bot(command_prefix = prefix, help_command = None, intents = intents)
 
 
+
+
 with open("config.json", "r", encoding="utf-8") as fh:
     config = json.load(fh)
 token = config['token']
+
+database = mysql.connector.connect(
+    host = config['host'],
+    user = config['user'],
+    password = config['password'],
+    database = config['database']
+)
 
 @bot.event 
 async def on_ready():
