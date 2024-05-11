@@ -27,6 +27,8 @@ database = mysql.connector.connect(
     database = config['database']
 )
 
+cursor = database.cursor(dictionary = True)
+
 @bot.event 
 async def on_ready():
     print("Ready")
@@ -61,11 +63,27 @@ async def hello(ctx, title, description, role: discord.Role, date):
     date_object = datetime.strptime(date, '%B %d %Y %I:%M%p')
     timestamp = date_object.timestamp()
 
+    authorID = ctx.author.id 
+
+    async def rsvp(authorID):
+        async def rsvp_auxiliary(interaction, authorID):
+            sql = "INSERT INTO events (ID, DATE, TITLE, DESCRIPTION, RSVP, HOURS) VALUES (%s, %s, %s, %s, %s, %s)"
+            val = (1, timestamp, title, description, authorID, 2)
+            cursor.execute(sql, val)
+            database.commit()
+
+            await interaction.response.send_message("You clicked the green button!", ephemeral=True)
+        return rsvp_auxiliary
+
+    button1.callback = rsvp(authorID)
+
     role = discord.utils.get(ctx.guild.roles, name=role.name)
     for member in ctx.guild.members:
         if role in member.roles:
             await member.send(f"**New event!**\nYou are recieving this message because you opted-in for events relating to {role.name}. To stop recieving event information, click the appropriate button", embed=embed, view = view)  
 
     await ctx.send(embed=embed, view = view)  
+
+
 
 bot.run(token)
