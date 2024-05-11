@@ -65,14 +65,22 @@ async def hello(ctx, title, description, role: discord.Role, date):
 
     authorID = ctx.author.id 
 
-    async def rsvp(authorID):
-        async def rsvp_auxiliary(interaction, authorID):
-            sql = "INSERT INTO events (ID, DATE, TITLE, DESCRIPTION, RSVP, HOURS) VALUES (%s, %s, %s, %s, %s, %s)"
-            val = (1, timestamp, title, description, authorID, 2)
-            cursor.execute(sql, val)
-            database.commit()
+    def rsvp(authorID):
+        async def rsvp_auxiliary(interaction):
+            """
+            rsvp_auxiliary can ONLY have interaction as its parameter. To access additional ones, 
+            """
+            try:
+                sql = "INSERT INTO events (ID, DATE, TITLE, DESCRIPTION, RSVP, HOURS) VALUES (%s, %s, %s, %s, %s, %s)"
+                val = (1, timestamp, title, description, authorID, 2)
+                cursor.execute(sql, val)
+                database.commit()
+                print(f"Worked")
+            except Exception as error:
+                database.rollback() 
+                print(f"Transaction failed. Error: {error}")
 
-            await interaction.response.send_message("You clicked the green button!", ephemeral=True)
+            await interaction.response.send_message("Added to event list!", ephemeral=True)
         return rsvp_auxiliary
 
     button1.callback = rsvp(authorID)
@@ -83,7 +91,6 @@ async def hello(ctx, title, description, role: discord.Role, date):
             await member.send(f"**New event!**\nYou are recieving this message because you opted-in for events relating to {role.name}. To stop recieving event information, click the appropriate button", embed=embed, view = view)  
 
     await ctx.send(embed=embed, view = view)  
-
 
 
 bot.run(token)
